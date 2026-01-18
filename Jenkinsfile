@@ -5,7 +5,7 @@ pipeline {
         LOCAL_REPO_PATH = "/var/jenkins_home/warlord/freqtrader"
         IMAGE_NAME      = "my-freqtrade-bot"
         IMAGE_TAG       = "latest"
-        ALLOW_LOCAL_CHECKOUT = True
+        ALLOW_LOCAL_CHECKOUT = "True"
     }
 
     stages {
