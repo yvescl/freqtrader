@@ -6,6 +6,7 @@ pipeline {
         IMAGE_NAME      = "my-freqtrade-bot"
         IMAGE_TAG       = "latest"
         ALLOW_LOCAL_CHECKOUT = "True"
+        REGISTRY = "registry.martin.whtn.adminthis.be"
     }
 
     stages {
@@ -35,8 +36,14 @@ pipeline {
 
         stage('Verify Image') {
             steps {
-                // Check if freqtrade is correctly installed in the new image
-                sh "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} freqtrade --version"
+            // Correct usage: skip the 'freqtrade' word
+            sh "docker run --rm ${IMAGE_NAME}:${TAG} show-config"
+             }
+        }
+        stage('Push to Local Registry') {
+            steps {
+                // Pushing the tagged image
+                sh "docker push ${REGISTRY}/${IMAGE_NAME}:${TAG}"
             }
         }
     }
