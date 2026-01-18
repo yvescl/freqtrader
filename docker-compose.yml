@@ -1,4 +1,6 @@
----
+networks:
+  freqtrade:
+    driver: bridge
 services:
   freqtrade:
     image: freqtradeorg/freqtrade:stable
@@ -21,16 +23,293 @@ services:
     restart: unless-stopped
     container_name: freqtrade
     volumes:
-      - "./user_data:/freqtrade/user_data"
+      - "/home/warlord/freqtrader/user_data:/freqtrade/user_data"
     # Expose api on port 8080 (localhost only)
     # Please read the https://www.freqtrade.io/en/stable/rest-api/ documentation
     # for more information.
     ports:
-      - "127.0.0.1:8080:8080"
+      - "58080:8080"
     # Default command used when running `docker compose up`
     command: >
       trade
       --logfile /freqtrade/user_data/logs/freqtrade.log
       --db-url sqlite:////freqtrade/user_data/tradesv3.sqlite
       --config /freqtrade/user_data/config.json
-      --strategy SampleStrategy
+      --strategy TestStrategy -v
+    networks:
+      - freqtrade
+
+
+  freqtrade_elliotwaves:
+    image: freqtradeorg/freqtrade:stable
+    # image: freqtradeorg/freqtrade:develop
+    # Use plotting image
+    # image: freqtradeorg/freqtrade:develop_plot
+    # # Enable GPU Image and GPU Resources (only relevant for freqAI)
+    # # Make sure to uncomment the whole deploy section
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    # Build step - only needed when additional dependencies are needed
+    # build:
+    #   context: .
+    #   dockerfile: "./docker/Dockerfile.custom"
+    restart: unless-stopped
+    container_name: freqtrade_elliotwaves
+    volumes:
+      - "/home/warlord/freqtrader/user_data:/freqtrade/user_data"
+    # Expose api on port 8080 (localhost only)
+    # Please read the https://www.freqtrade.io/en/stable/rest-api/ documentation
+    # for more information.
+    ports:
+      - "58081:8080"
+    # Default command used when running `docker compose up`
+    command: >
+      trade
+      --logfile /freqtrade/user_data/logs/freqtrade_elliott.log
+      --db-url sqlite:////freqtrade/user_data/tradesv3_elliott.sqlite
+      --config /freqtrade/user_data/config_elliott.json
+      --strategy ElliottWaveStrategy -v
+    networks:
+      - freqtrade
+
+  freqtrade_cuttingedge:
+    image: freqtradeorg/freqtrade:stable
+    # image: freqtradeorg/freqtrade:develop
+    # Use plotting image
+    # image: freqtradeorg/freqtrade:develop_plot
+    # # Enable GPU Image and GPU Resources (only relevant for freqAI)
+    # # Make sure to uncomment the whole deploy section
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    # Build step - only needed when additional dependencies are needed
+    # build:
+    #   context: .
+    #   dockerfile: "./docker/Dockerfile.custom"
+    restart: unless-stopped
+    container_name: freqtrade_cuttingedge
+    volumes:
+      - "/home/warlord/freqtrader/user_data:/freqtrade/user_data"
+    # Expose api on port 8080 (localhost only)
+    # Please read the https://www.freqtrade.io/en/stable/rest-api/ documentation
+    # for more information.
+    ports:
+      - "58082:8080"
+    # Default command used when running `docker compose up`
+    command: >
+      trade
+      --logfile /freqtrade/user_data/logs/freqtrade_cuttingedge.log
+      --db-url sqlite:////freqtrade/user_data/tradesv3_cuttingedge.sqlite
+      --config /freqtrade/user_data/config_cuttingedge.json
+      --strategy CuttingEdgeRegimeBot -v
+    networks:
+      - freqtrade
+
+  freqtrade_shorttermscalper:
+    image: freqtradeorg/freqtrade:stable
+    # image: freqtradeorg/freqtrade:develop
+    # Use plotting image
+    # image: freqtradeorg/freqtrade:develop_plot
+    # # Enable GPU Image and GPU Resources (only relevant for freqAI)
+    # # Make sure to uncomment the whole deploy section
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    # Build step - only needed when additional dependencies are needed
+    # build:
+    #   context: .
+    #   dockerfile: "./docker/Dockerfile.custom"
+    restart: unless-stopped
+    container_name: freqtrade_shorttermscalper
+    volumes:
+      - "/home/warlord/freqtrader/user_data:/freqtrade/user_data"
+    # Expose api on port 8080 (localhost only)
+    # Please read the https://www.freqtrade.io/en/stable/rest-api/ documentation
+    # for more information.
+    ports:
+      - "58083:8080"
+    # Default command used when running `docker compose up`
+    command: >
+      trade
+      --logfile /freqtrade/user_data/logs/freqtrade_shorttermscalper.log
+      --db-url sqlite:////freqtrade/user_data/tradesv3_shorttermscalper.sqlite
+      --config /freqtrade/user_data/config_shorttermscalper.json
+      --strategy ShortTermScalper -v
+    networks:
+      - freqtrade
+
+  freqtrade_contrarian:
+    image: freqtradeorg/freqtrade:stable
+    # image: freqtradeorg/freqtrade:develop
+    # Use plotting image
+    # image: freqtradeorg/freqtrade:develop_plot
+    # # Enable GPU Image and GPU Resources (only relevant for freqAI)
+    # # Make sure to uncomment the whole deploy section
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    # Build step - only needed when additional dependencies are needed
+    # build:
+    #   context: .
+    #   dockerfile: "./docker/Dockerfile.custom"
+    restart: unless-stopped
+    container_name: freqtrade_contrarian
+    volumes:
+      - "/home/warlord/freqtrader/user_data:/freqtrade/user_data"
+    # Expose api on port 8080 (localhost only)
+    # Please read the https://www.freqtrade.io/en/stable/rest-api/ documentation
+    # for more information.
+    ports:
+      - "58084:8080"
+    # Default command used when running `docker compose up`
+    command: >
+      trade
+      --logfile /freqtrade/user_data/logs/freqtrade_contrarian.log
+      --db-url sqlite:////freqtrade/user_data/freqtrade_contrarian.sqlite
+      --config /freqtrade/user_data/config_contrarian.json
+      --strategy ContrarianMeanReversion -v
+    networks:
+      - freqtrade
+
+  freqtrade_5minscalper:
+    image: freqtrade:latest
+    # image: freqtradeorg/freqtrade:develop
+    # Use plotting image
+    # image: freqtradeorg/freqtrade:develop_plot
+    # # Enable GPU Image and GPU Resources (only relevant for freqAI)
+    # # Make sure to uncomment the whole deploy section
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    # Build step - only needed when additional dependencies are needed
+    # build:
+    #   context: .
+    #   dockerfile: "./docker/Dockerfile.custom"
+    restart: unless-stopped
+    container_name: freqtrade_5minscalper
+    volumes:
+      - "/home/warlord/freqtrader/user_data:/freqtrade/user_data"
+    # Expose api on port 8080 (localhost only)
+    # Please read the https://www.freqtrade.io/en/stable/rest-api/ documentation
+    # for more information.
+    ports:
+      - "58085:8080"
+    # Default command used when running `docker compose up`
+    command: >
+      trade
+      --logfile /freqtrade/user_data/logs/freqtrade_5minscalper.log
+      --db-url sqlite:////freqtrade/user_data/freqtrade_5minscalper.sqlite
+      --config /freqtrade/user_data/config_5minscalper.json
+      --strategy FiveMinScalper -v
+    networks:
+      - freqtrade
+
+
+
+  freqtrade_FFTStrategy:
+    image: freqtradeorg/freqtrade:stable
+    # image: freqtradeorg/freqtrade:develop
+    # Use plotting image
+    # image: freqtradeorg/freqtrade:develop_plot
+    # # Enable GPU Image and GPU Resources (only relevant for freqAI)
+    # # Make sure to uncomment the whole deploy section
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    # Build step - only needed when additional dependencies are needed
+    # build:
+    #   context: .
+    #   dockerfile: "./docker/Dockerfile.custom"
+    restart: unless-stopped
+    container_name: freqtrade_FFTStrategy
+    volumes:
+      - "/home/warlord/freqtrader/user_data:/freqtrade/user_data"
+    # Expose api on port 8080 (localhost only)
+    # Please read the https://www.freqtrade.io/en/stable/rest-api/ documentation
+    # for more information.
+    ports:
+      - "58086:8080"
+    # Default command used when running `docker compose up`
+    command: >
+      trade
+      --logfile /freqtrade/user_data/logs/freqtrade_FFTStrategy.log
+      --db-url sqlite:////freqtrade/user_data/freqtrade_FFTStrategy.sqlite
+      --config /freqtrade/user_data/config_FFTStrategy.json
+      --strategy FftEwoStrategy -v
+    networks:
+      - freqtrade
+
+
+
+  freqtrade_arima:
+    image: freqtrade:latest
+    # image: freqtradeorg/freqtrade:develop
+    # Use plotting image
+    # image: freqtradeorg/freqtrade:develop_plot
+    # # Enable GPU Image and GPU Resources (only relevant for freqAI)
+    # # Make sure to uncomment the whole deploy section
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    # Build step - only needed when additional dependencies are needed
+    # build:
+    #   context: .
+    #   dockerfile: "./docker/Dockerfile.custom"
+    restart: unless-stopped
+    container_name: freqtrade_arima
+    volumes:
+      - "/home/warlord/freqtrader/user_data:/freqtrade/user_data"
+    # Expose api on port 8080 (localhost only)
+    # Please read the https://www.freqtrade.io/en/stable/rest-api/ documentation
+    # for more information.
+    ports:
+      - "58087:8080"
+    # Default command used when running `docker compose up`
+    command: >
+      trade
+      --logfile /freqtrade/user_data/logs/freqtrade_arima.log
+      --db-url sqlite:////freqtrade/user_data/freqtrade_arima.sqlite
+      --config /freqtrade/user_data/config_arima.json
+      --strategy ArimaStrategy -v
+    networks:
+      - freqtrade
+
+
+
+
+
+
+
+
+
+
+

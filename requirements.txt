@@ -6,6 +6,7 @@ numexpr==2.14.1
 ft-pandas-ta==0.3.16
 ta-lib==0.6.8
 technical==1.5.4
+statsmodels==0.14.6
 
 ccxt==4.5.32
 cryptography==46.0.3
