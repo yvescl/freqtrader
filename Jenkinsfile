@@ -25,25 +25,24 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build & Tag Image') {
             steps {
-                script {
-                    // This builds the image using the Dockerfile in your repo
-                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                }
+                // Use env. prefix for variables defined in the environment block
+                sh "docker build -t ${env.IMAGE_NAME}:${env.TAG} ."
+                sh "docker tag ${env.IMAGE_NAME}:${env.TAG} ${env.REGISTRY}/${env.IMAGE_NAME}:${env.TAG}"
             }
         }
 
         stage('Verify Image') {
             steps {
-            // Correct usage: skip the 'freqtrade' word
-            sh "docker run --rm ${IMAGE_NAME}:${TAG} show-config"
-             }
+                // Fixed the 'freqtrade' command issue AND the variable issue
+                sh "docker run --rm ${env.IMAGE_NAME}:${env.TAG} --version"
+            }
         }
+
         stage('Push to Local Registry') {
             steps {
-                // Pushing the tagged image
-                sh "docker push ${REGISTRY}/${IMAGE_NAME}:${TAG}"
+                sh "docker push ${env.REGISTRY}/${env.IMAGE_NAME}:${env.TAG}"
             }
         }
     }
