@@ -21,7 +21,7 @@ pipeline {
             steps {
                 checkout([$class: 'GitSCM', 
                     branches: [[name: '*/develop']], 
-                    userRemoteConfigs: [[url: "file://${env.LOCAL_REPO_PATH}"]]
+                    userRemoteConfigs: [[url: "https://github.com/yvescl/freqtrader.git"]]
                 ])
             }
         }
