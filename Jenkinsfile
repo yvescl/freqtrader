@@ -4,7 +4,7 @@ pipeline {
     environment {
         LOCAL_REPO_PATH = "/var/jenkins_home/warlord/freqtrader"
         IMAGE_NAME      = "my-freqtrade-bot"
-        TAG       = "latest"
+        TAG       = "1.0.$BUILD_NUMBER" 
         ALLOW_LOCAL_CHECKOUT = "True"
         REGISTRY = "registry.martin.whtn.adminthis.be"
         GIT_CONFIG_PARAMETERS = "'safe.directory=*'"
