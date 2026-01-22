@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         LOCAL_REPO_PATH = "/var/jenkins_home/warlord/freqtrader"
-        IMAGE_NAME      = "my-freqtrade-bot"
+        IMAGE_NAME      = "freqtrader-bot"
         TAG       = "1.0.$BUILD_NUMBER" 
         ALLOW_LOCAL_CHECKOUT = "True"
         REGISTRY = "registry.martin.whtn.adminthis.be"
