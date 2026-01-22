@@ -30,6 +30,7 @@ pipeline {
             steps {
                 // Use env. prefix for variables defined in the environment block
                 sh "docker build -t ${env.IMAGE_NAME}:${env.TAG} ."
+                sh "docker build -t ${env.IMAGE_NAME}:latest ."
                 sh "docker tag ${env.IMAGE_NAME}:${env.TAG} ${env.REGISTRY}/${env.IMAGE_NAME}:${env.TAG}"
             }
         }
