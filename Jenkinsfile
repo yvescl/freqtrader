@@ -10,7 +10,7 @@ pipeline {
         //GIT_CONFIG_PARAMETERS = "'safe.directory=*'"
     }
 
-    //stages {
+    stages {
     //    stage('Fix Git Ownership') {
     //       steps {
     //           sh "git config --global --add safe.directory ${env.LOCAL_REPO_PATH}"
