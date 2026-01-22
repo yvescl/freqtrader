@@ -39,12 +39,14 @@ pipeline {
             steps {
                 // Fixed the 'freqtrade' command issue AND the variable issue
                 sh "docker run --rm ${env.IMAGE_NAME}:${env.TAG} --version"
+                sh "docker run --rm ${env.IMAGE_NAME}:latest --version"
             }
         }
 
         stage('Push to Local Registry') {
             steps {
                 sh "docker push ${env.REGISTRY}/${env.IMAGE_NAME}:${env.TAG}"
+                sh "docker push ${env.REGISTRY}/${env.IMAGE_NAME}:latest"
             }
         }
     }
