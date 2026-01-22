@@ -7,15 +7,15 @@ pipeline {
         TAG       = "1.0.$BUILD_NUMBER" 
         ALLOW_LOCAL_CHECKOUT = "True"
         REGISTRY = "registry.martin.whtn.adminthis.be"
-        GIT_CONFIG_PARAMETERS = "'safe.directory=*'"
+        //GIT_CONFIG_PARAMETERS = "'safe.directory=*'"
     }
 
-    stages {
-        stage('Fix Git Ownership') {
-            steps {
-                sh "git config --global --add safe.directory ${env.LOCAL_REPO_PATH}"
-            }
-        }
+    //stages {
+    //    stage('Fix Git Ownership') {
+    //       steps {
+    //           sh "git config --global --add safe.directory ${env.LOCAL_REPO_PATH}"
+    //        }
+    //    }
 
         stage('Checkout') {
             steps {
