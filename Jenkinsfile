@@ -45,7 +45,7 @@ pipeline {
                 '''
             }
         }
-}
+
 
         stage('Build & Tag Image') {
             steps {
