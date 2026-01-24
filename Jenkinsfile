@@ -26,6 +26,27 @@ pipeline {
             }
         }
 
+        stage('Vulnerability Scan') {
+            agent {
+                docker { 
+                    // Use 'slim' to keep the build fast and lightweight
+                    image 'python:3.12-slim' 
+                    // Optional: Reuse the same workspace to see your code
+                    reuseNode true 
+                }
+            }
+            steps {
+                sh '''
+                    # Install pip-audit inside the container
+                    pip install --no-cache-dir pip-audit
+                    
+                    # Audit the requirements file
+                    pip-audit -r requirements.txt
+                '''
+            }
+        }
+}
+
         stage('Build & Tag Image') {
             steps {
                 // Use env. prefix for variables defined in the environment block
