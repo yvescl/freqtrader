@@ -28,7 +28,7 @@ pipeline {
 
         stage('Vulnerability Scan') {
             agent {
-                docker { 
+                dockerContainer { 
                     // Use 'slim' to keep the build fast and lightweight
                     image 'python:3.12-slim' 
                     // Optional: Reuse the same workspace to see your code
