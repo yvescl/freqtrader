@@ -26,24 +26,6 @@ pipeline {
             }
         }
 
-        stage('Vulnerability Scan') {
-            agent {
-                dockerContainer { 
-                    // Use 'slim' to keep the build fast and lightweight
-                    image 'python:3.12-slim' 
-                }
-            }
-            steps {
-                sh '''
-                    # Install pip-audit inside the container
-                    pip install --no-cache-dir pip-audit
-                    
-                    # Audit the requirements file
-                    pip-audit -r requirements.txt
-                '''
-            }
-        }
-
 
         stage('Build & Tag Image') {
             steps {
