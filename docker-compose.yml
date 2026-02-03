@@ -267,7 +267,7 @@ services:
 
 
   freqtrade_arima:
-    image: freqtrade:latest
+    image: freqtrader-bot:latest
     # image: freqtradeorg/freqtrade:develop
     # Use plotting image
     # image: freqtradeorg/freqtrade:develop_plot
