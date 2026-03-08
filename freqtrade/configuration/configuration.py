@@ -238,19 +238,12 @@ class Configuration:
                     )
         if not config.get("exportdirectory"):
             config["exportdirectory"] = config["user_data_dir"] / "backtest_results"
-        if not config.get("exportfilename"):
-            config["exportfilename"] = None
+
+        config["exportfilename"] = config.get("exportfilename", None)
         if config.get("exportfilename"):
             # ensure exportfilename is a Path object
             config["exportfilename"] = Path(config["exportfilename"])
         config["exportdirectory"] = Path(config["exportdirectory"])
-
-        if self.args.get("show_sensitive"):
-            logger.warning(
-                "Sensitive information will be shown in the upcoming output. "
-                "Please make sure to never share this output without redacting "
-                "the information yourself."
-            )
 
     def _process_optimize_options(self, config: Config) -> None:
         # This will override the strategy configuration
@@ -318,6 +311,13 @@ class Configuration:
         self._args_to_config_loop(config, configurations)
 
         self._process_datadir_options(config)
+
+        if self.args.get("show_sensitive"):
+            logger.warning(
+                "Sensitive information will be shown in the upcoming output. "
+                "Please make sure to never share this output without redacting "
+                "the information yourself."
+            )
 
         self._args_to_config(
             config,
@@ -410,7 +410,7 @@ class Configuration:
             ("include_inactive", "Detected --include-inactive-pairs: {}"),
             ("no_parallel_download", "Detected --no-parallel-download: {}"),
             ("download_trades", "Detected --dl-trades: {}"),
-            ("convert_trades", "Detected --convert: {} - Converting Trade data to OHCV {}"),
+            ("convert_trades", "Detected --convert: {} - Converting trade data to OHLCV."),
             ("dataformat_ohlcv", 'Using "{}" to store OHLCV data.'),
             ("dataformat_trades", 'Using "{}" to store trades data.'),
             ("show_timerange", "Detected --show-timerange"),
