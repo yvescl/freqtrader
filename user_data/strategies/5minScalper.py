@@ -1,76 +1,84 @@
-from freqtrade.strategy import IStrategy, informative
 import talib.abstract as ta
 from pandas import DataFrame
-import datetime
-from statsmodels.tsa.arima.model import ARIMA
-
-import logging
-logger = logging.getLogger(__name__)
+from datetime import datetime
+from freqtrade.strategy import IStrategy, IntParameter, DecimalParameter, informative
+import freqtrade.vendor.qtpylib.indicators as qtpylib
 
 class FiveMinScalper(IStrategy):
-    INTERFACE_VERSION = 3  # Important for newer versions
+    INTERFACE_VERSION = 3
     timeframe = '5m'
     
-    # These settings manage your exits automatically
-    minimal_roi = {"0": 0.02}
+    # Required for the engine to pre-calculate indicators
+    startup_candle_count = 200
+    process_only_new_candles = True
+
+    # Risk Management
     stoploss = -0.10
-    process_only_new_candles = False
-    use_custom_stoploss = True
-    trailing_stop = False
+    minimal_roi = {
+        "0": 0.05,
+        "15": 0.02,
+        "30": 0.01
+    }
+
+    # Hyperoptable Parameters
+    buy_rsi = IntParameter(20, 45, default=30, space="buy")
+    atr_mult = DecimalParameter(1.0, 4.0, default=2.0, space="sell")
 
     @informative('1h')
     def populate_indicators_1h(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        """
+        The decorator handles all merging. 
+        Columns created here will be available as '{column}_1h' in the main dataframe.
+        """
         dataframe['ema200'] = ta.EMA(dataframe, timeperiod=200)
-        # Standard 14-period ATR
-        dataframe['atr'] = ta.ATR(dataframe, timeperiod=14)
         return dataframe
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        # 5m timeframe indicators
         dataframe['ema9'] = ta.EMA(dataframe, timeperiod=9)
         dataframe['ema20'] = ta.EMA(dataframe, timeperiod=20)
         dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
+        dataframe['atr'] = ta.ATR(dataframe, timeperiod=14)
+        
         return dataframe
-
-    def custom_stoploss(self, pair: str, trade: 'Trade', current_time: datetime, 
-                    current_rate: float, current_profit: float, **kwargs) -> float:
-
-        logger.info(f"Checking custom stoploss for {pair}. Current profit: {current_profit}")
-        # Get the last analyzed candle
-        dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
-        last_candle = dataframe.iloc[-1].squeeze()
-
-        # Calculate ATR-based distance (e.g., 3x ATR)
-        # This represents the "volatility buffer"
-        if last_candle['atr'] > 0:
-            # Distance as a percentage of current price
-            atr_dist = (last_candle['atr'] * 3) / current_rate
-        
-            # return the distance from current_rate
-            # Freqtrade will only update the stoploss if it moves UP
-            return -atr_dist
-        
-        return self.stoploss # Fallback to default
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         dataframe.loc[
             (
-                (dataframe['ema200_1h'] < dataframe['close']) &
-                (dataframe['ema9'] > dataframe['ema20']) &
-                (dataframe['rsi'] > 30) &
+                # Suffix '_1h' is automatically handled by the decorator
+                (dataframe['close'] > dataframe['ema200_1h']) &
+                
+                # Crossover logic
+                (qtpylib.crossed_above(dataframe['ema9'], dataframe['ema20'])) &
+                
+                # RSI threshold
+                (dataframe['rsi'] > self.buy_rsi.value) &
+                
                 (dataframe['volume'] > 0)
             ),
-            'enter_long'] = 1  # Changed from 'buy' to 'enter_long'
+            'enter_long'] = 1
         return dataframe
 
     def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-        """
-        Technical exit: Sell if EMA9 crosses back below EMA20
-        (This happens before ROI or Stoploss if the trend breaks)
-        """
         dataframe.loc[
             (
-                (dataframe['ema9'] < dataframe['ema20']) &
-                (dataframe['volume'] > 0)
+                # Exit when trend flips
+                (qtpylib.crossed_below(dataframe['ema9'], dataframe['ema20']))
             ),
             'exit_long'] = 1
         return dataframe
+
+    def custom_stoploss(self, pair: str, trade: 'Trade', current_time: datetime, 
+                        current_rate: float, current_profit: float, **kwargs) -> float:
+        """
+        Calculates a dynamic stoploss based on ATR.
+        """
+        dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
+        
+        if not dataframe.empty:
+            last_candle = dataframe.iloc[-1]
+            if last_candle['atr'] > 0:
+                # Return the distance as a negative ratio
+                return -(last_candle['atr'] * float(self.atr_mult.value)) / current_rate
+        
+        return self.stoploss

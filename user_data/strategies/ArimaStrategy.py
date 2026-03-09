@@ -54,9 +54,13 @@ class ArimaStrategy(IStrategy):
             try:
                 # Order (1,1,0) is used for speed and convergence stability
                 model = ARIMA(scaled_data, order=(15, 1, 0))
-                model_fit = model.fit(method='yule_walker') # Robust linear estimator
+                model_fit = model.fit(method='statespace', cov_type='robust')
+
+                # To get the log-likelihood value specifically:
+                log_likelihood = model_fit.llf
+                print(f"Log-Likelihood: {log_likelihood}")
                 
-                forecast = model_fit.forecast(steps=2)
+                forecast = model_fit.forecast(steps=5)
                 dataframe.iloc[i, dataframe.columns.get_loc('arima_forecast')] = forecast[0] / scale_factor
             except Exception:
                 logger.info("ARIMA exception")
