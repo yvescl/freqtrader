@@ -55,8 +55,11 @@ class FourierWaveletStrategy(IStrategy):
         # 3. Wavelet Transform Features
         # Wavelets are great for non-stationary data (like crypto prices)
         def get_wavelet_feature(data):
+            # Copy: pandas 3.x passes read-only buffers to rolling.apply,
+            # but pywt requires writable arrays
+            values = np.array(data, dtype=np.float64)
             # Using Daubechies 4 wavelet for decomposition
-            coeffs = pywt.wavedec(data, 'db4', level=2)
+            coeffs = pywt.wavedec(values, 'db4', level=2)
             # Return the mean of the detail coefficients (high-frequency parts)
             return np.mean(coeffs[1])
 
