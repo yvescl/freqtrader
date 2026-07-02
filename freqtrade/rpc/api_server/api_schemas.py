@@ -6,7 +6,7 @@ from pydantic import AwareDatetime, BaseModel, Field, RootModel, SerializeAsAny,
 from freqtrade.constants import DL_DATA_TIMEFRAMES, IntOrInf
 from freqtrade.enums import MarginMode, OrderTypeValues, SignalDirection, TradingMode
 from freqtrade.ft_types import AnnotationType, ValidExchangesType
-from freqtrade.rpc.api_server.webserver_bgwork import ProgressTask
+from freqtrade.rpc.api_server.webserver_bgwork import JOB_CATEGORIES, ProgressTask
 
 
 class ExchangeModePayloadMixin(BaseModel):
@@ -41,7 +41,7 @@ class BgJobStarted(StatusMsg):
 
 class BackgroundTaskStatus(BaseModel):
     job_id: str
-    job_category: str
+    job_category: JOB_CATEGORIES
     status: str
     running: bool
     progress: float | None = None
@@ -255,6 +255,7 @@ class ShowConfig(BaseModel):
     timeframe_ms: int
     timeframe_min: int
     exchange: str
+    demo_trading: bool
     strategy: str | None = None
     force_entry_enable: bool
     exit_pricing: dict[str, Any]
@@ -679,9 +680,73 @@ class BacktestMarketChange(BaseModel):
     data: list[list[Any]]
 
 
+class LookaheadAnalysisRequest(BaseModel):
+    strategy: str
+    timeframe: str | None = None
+    timerange: str | None = None
+    minimum_trade_amount: int = 10
+    targeted_trade_amount: int = 20
+    lookahead_allow_limit_orders: bool = False
+
+
+class LookaheadAnalysisResultEntry(BaseModel):
+    strategy: str
+    has_bias: bool
+    total_signals: int
+    biased_entry_signals: int
+    biased_exit_signals: int
+    biased_indicators: list[str]
+
+
+class LookaheadAnalysisResponse(BaseModel):
+    status: str
+    running: bool
+    status_msg: str
+    result: LookaheadAnalysisResultEntry | None = None
+
+
+class RecursiveAnalysisRequest(BaseModel):
+    strategy: str
+    timeframe: str | None = None
+    timerange: str | None = None
+    startup_candle: list[int] | None = None
+
+
+class RecursiveAnalysisResultEntry(BaseModel):
+    strategy: str
+    startup_candles: list[int] = Field(description="The startup candle counts that were tested.")
+    strategy_scc: int | None = Field(
+        default=None,
+        description="The strategy's own startup_candle_count, if it could be determined.",
+    )
+    results: dict[str, dict[str, float]] = Field(
+        description=(
+            "Per-indicator variance keyed by indicator name, then by startup candle count. "
+            "e.g. { 'rsi': { '199': 0.123, '200': float('nan'), ... }, 'macd': { ... }, ... } }. "
+        )
+    )
+
+
+class RecursiveAnalysisResponse(BaseModel):
+    status: str
+    running: bool
+    status_msg: str
+    result: RecursiveAnalysisResultEntry | None = None
+
+
+class WalletHistoryResponse(BaseModel):
+    columns: list[str]
+    length: int
+    data: list[list[Any]]
+    # start date of the effectively captured data
+    # Before this date, it's based on a reconstructed wallet history
+    capture_start_ts: int | None = None
+
+
 class MarketRequest(ExchangeModePayloadMixin, BaseModel):
     base: str | None = None
     quote: str | None = None
+    include_inactive: bool = False
 
 
 class MarketModel(BaseModel):
@@ -690,6 +755,7 @@ class MarketModel(BaseModel):
     quote: str
     spot: bool
     swap: bool
+    active: bool = False  # Assume false if the field is missing.
 
 
 class MarketResponse(BaseModel):
@@ -697,9 +763,25 @@ class MarketResponse(BaseModel):
     exchange_id: str
 
 
+class CpuInfo(BaseModel):
+    cpu: int
+    pct: float
+
+
 class SysInfo(BaseModel):
-    cpu_pct: list[float]
-    ram_pct: float
+    """Information about the system running the bot based on psutil output/measurements
+
+    Note: cpu_pct is deprecated and may be removed in a future release. Use cpu_load instead.
+    """
+
+    cpu_pct: list[float] = Field(
+        default=[], deprecated=True, description="Use cpu_load object instead"
+    )
+    cpu_load: list[CpuInfo]
+    cpu_load_avg: dict[str, float]
+    cpu_count: int = Field(description="Number of logical CPUs as provided by psutil")
+    cpu_avg: float = Field(description="Average CPU load across all cores as provided by psutil")
+    ram_pct: float = Field(description="RAM usage percentage as provided by psutil")
 
 
 class Health(BaseModel):
