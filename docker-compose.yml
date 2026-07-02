@@ -345,6 +345,28 @@ services:
       - freqtrade
 
 
+  freqtrade_FourierWavelet:
+    build:
+      context: .
+      dockerfile: "./docker/Dockerfile.custom"
+    image: freqtrader-fourierwavelet:latest
+    restart: unless-stopped
+    container_name: freqtrade_FourierWavelet
+    volumes:
+      - "/home/warlord/freqtrader/user_data:/freqtrade/user_data"
+    ports:
+      - "58089:8080"
+    command: >
+      trade
+      --logfile /freqtrade/user_data/logs/freqtrade_FourierWavelet.log
+      --db-url sqlite:////freqtrade/user_data/freqtrade_FourierWavelet.sqlite
+      --config /freqtrade/user_data/config_FourierWavelet.json
+      --freqaimodel XGBoostRegressor
+      --strategy FourierWaveletStrategy -v
+    networks:
+      - freqtrade
+
+
 
 
 
