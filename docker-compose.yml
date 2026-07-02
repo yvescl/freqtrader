@@ -227,7 +227,7 @@ services:
 
 
 
-  freqtrade_FFTStrategy:
+  freqtrade_XGBooster:
     image: registry.martin.whtn.adminthis.be/freqtrader-bot:latest
     # image: freqtradeorg/freqtrade:develop
     # Use plotting image
@@ -246,7 +246,7 @@ services:
     #   context: .
     #   dockerfile: "./docker/Dockerfile.custom"
     restart: unless-stopped
-    container_name: freqtrade_FFTStrategy
+    container_name: freqtrade_XGBooster
     volumes:
       - "/home/warlord/freqtrader/user_data:/freqtrade/user_data"
     # Expose api on port 8080 (localhost only)
@@ -257,10 +257,11 @@ services:
     # Default command used when running `docker compose up`
     command: >
       trade
-      --logfile /freqtrade/user_data/logs/freqtrade_FFTStrategy.log
-      --db-url sqlite:////freqtrade/user_data/freqtrade_FFTStrategy.sqlite
-      --config /freqtrade/user_data/config_FFTStrategy.json
-      --strategy FftEwoStrategy -v
+      --logfile /freqtrade/user_data/logs/freqtrade_XGBooster.log
+      --db-url sqlite:////freqtrade/user_data/freqtrade_XGBooster.sqlite
+      --config /freqtrade/user_data/config_XGBooster.json
+      --freqaimodel XGBoostClassifier
+      --strategy XGBoosterStrategy -v
     networks:
       - freqtrade
 
